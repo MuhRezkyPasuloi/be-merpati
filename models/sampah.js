@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     foto_url: DataTypes.STRING,
     stok: DataTypes.INTEGER,
     harga: DataTypes.INTEGER,
+    harga_vendor: DataTypes.INTEGER,
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE
   }, {

@@ -38,5 +38,12 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'laporan'
   });
 
+  // Laporan.associate = (models) => {
+  //   Laporan.belongsTo(models.Nasabah, {
+  //     foreignKey: 'id_nasabah',
+  //     as: 'nasabah'
+  //   });
+  // }
+
   return Laporan;
 };

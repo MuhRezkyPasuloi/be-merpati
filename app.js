@@ -47,6 +47,7 @@ const sampahRoutes = require('./routes/sampahRoutes');
 const tabunganRoutes = require('./routes/tabunganRoutes');
 const penarikanRoutes = require('./routes/penarikanRoutes');
 const laporanRoutes = require('./routes/laporanRoutes');
+const penjualanRoutes = require('./routes/penjualanRoutes');
 // const transaksiRoutes = require('./routes/transaksiRoutes');
 
 // Gunakan semua rute
@@ -58,6 +59,7 @@ app.use('/api/sampah', sampahRoutes);
 app.use('/api/tabungan', tabunganRoutes);
 app.use('/api/penarikan', penarikanRoutes);
 app.use('/api/laporan', laporanRoutes);
+app.use('/api/penjualan', penjualanRoutes);
 // app.use('/api/transaksi', transaksiRoutes);
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
@@ -71,7 +73,7 @@ sequelize.authenticate()
   .then(() => console.log('Database sinkron'))
   .catch(err => console.error('Koneksi gagal:', err));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));
 
 module.exports = app; // untuk testing jika diperlukan

@@ -29,9 +29,9 @@ const express = require('express');
 const router = express.Router();
 const nasabahController = require('../controllers/nasabahController');
 const upload = require('../middleware/uploadMiddleware');
-
+const { authenticate } = require('../middleware/authMiddleware');
 router.get('/', nasabahController.getAll);
-router.get('/:id', nasabahController.getById);
+router.get('/:id', authenticate, nasabahController.getById);;
 router.post('/', upload.single('foto'), nasabahController.create);
 router.put('/:id', upload.single('foto'), nasabahController.update);
 router.delete('/:id', nasabahController.delete);
