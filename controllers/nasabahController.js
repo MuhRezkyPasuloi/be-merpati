@@ -26,21 +26,31 @@ module.exports = {
   },
 
   // Ambil 1 nasabah berdasarkan ID
-  getById: async (req, res) => {
-    try {
-      const nasabah = await Nasabah.findByPk(req.params.id, {
-        include: {
+  getById : async (req, res) => {
+  try {
+    const nasabah = await Nasabah.findByPk(req.params.id, {
+      include: [
+        {
           model: Login,
           as: 'login',
-          attributes: ['username']
+          attributes: ['id', 'username', 'email', 'role'] // Jangan kirim password
         }
-      });
-      if (!nasabah) return res.status(404).json({ message: "Nasabah tidak ditemukan" });
-      res.json(nasabah);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+      ]
+    });
+
+    if (!nasabah) {
+      return res.status(404).json({ message: 'Nasabah tidak ditemukan' });
     }
-  },
+
+    res.json(nasabah);
+  } catch (err) {
+    console.error('Gagal mengambil data nasabah:', err);
+    res.status(500).json({
+      message: 'Gagal mengambil data nasabah',
+      error: err.message
+    });
+  }
+},
 
   // Buat nasabah baru + buat akun login
   create: async (req, res) => {
@@ -51,9 +61,18 @@ module.exports = {
       if (exist) return res.status(400).json({ message: "Username sudah digunakan" });
 
       const hashedPassword = await bcrypt.hash(password || "nasabah123", 10);
+      // Buat email otomatis dari username
+      const email = `${username}@gmail.com`;
+
+      // Cek email sudah ada atau belum (karena unique)
+      const emailExist = await Login.findOne({ where: { email } });
+      if (emailExist) {
+        return res.status(400).json({ message: "Email otomatis sudah digunakan" });
+      }
 
       const login = await Login.create({
         username,
+        email,
         password: hashedPassword,
         role: "nasabah"
       });

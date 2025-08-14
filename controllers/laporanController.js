@@ -2,76 +2,6 @@
 const { Tabungan, Nasabah, Laporan } = require('../models');
 const { Op } = require('sequelize');
 
-// exports.generateLaporanBulanan = async (req, res) => {
-//   try {
-//     const { bulan, tahun } = req.query;
-
-//     if (!bulan || !tahun) {
-//       return res.status(400).json({ message: 'Bulan dan tahun wajib diisi' });
-//     }
-
-//     const startDate = new Date(tahun, bulan - 1, 1);
-//     const endDate = new Date(tahun, bulan, 0);
-
-//     const tabunganData = await Tabungan.findAll({
-//         where: {
-//             created_at: {
-//             [Op.between]: [startDate, endDate]
-//             }
-//         },
-//         include: [{
-//             model: Nasabah,
-//             as: 'Nasabah' // ✅ WAJIB SESUAIKAN DENGAN ALIAS
-//         }]
-//     });
-
-//     const laporan = {};
-
-//     tabunganData.forEach(item => {
-//       const key = `${item.id_nasabah}-${item.jenis_sampah}`;
-//       if (!laporan[key]) {
-//         laporan[key] = {
-//           id_nasabah: item.id_nasabah,
-//           nama_nasabah: item.Nasabah?.nama || 'Tidak Diketahui',
-//           jenis_sampah: item.jenis_sampah,
-//           tanggal_menabung: [],
-//           total_berat: 0,
-//           total_nominal: 0
-//         };
-//       }
-
-//       laporan[key].tanggal_menabung.push(item.created_at);
-//       laporan[key].total_berat += parseFloat(item.berat);
-//       laporan[key].total_nominal += parseFloat(item.total);
-//     });
-
-//     const laporanArray = Object.values(laporan);
-
-//     // Simpan ke tabel arsip laporan
-//     const laporanExist = await Laporan.findOne({ where: { bulan, tahun } });
-
-//     if (laporanExist) {
-//       await laporanExist.update({ data: laporanArray });
-//     } else {
-//       await Laporan.create({
-//         bulan,
-//         tahun,
-//         data: laporanArray
-//       });
-//     }
-
-//     res.json({
-//       message: 'Laporan bulanan berhasil dibuat',
-//       bulan: parseInt(bulan),
-//       tahun: parseInt(tahun),
-//       data: laporanArray
-//     });
-
-//   } catch (err) {
-//     res.status(500).json({ message: 'Gagal membuat laporan', error: err.message });
-//   }
-// };
-
 exports.generateLaporanBulanan = async (req, res) => {
   try {
     const { bulan, tahun } = req.query;
@@ -91,14 +21,14 @@ exports.generateLaporanBulanan = async (req, res) => {
       },
       include: [{
         model: Nasabah,
-        as: 'Nasabah'
+        as: 'nasabah'
       }]
     });
 
     // Ubah setiap transaksi menjadi baris laporan
     const laporanArray = tabunganData.map(item => ({
       id_nasabah: item.id_nasabah,
-      nama_nasabah: item.Nasabah?.nama || 'Tidak Diketahui',
+      nama_nasabah: item.nasabah?.nama || 'Tidak Diketahui',
       jenis_sampah: item.jenis_sampah,
       tanggal_menabung: item.created_at,
       total_berat: parseFloat(item.berat),
@@ -126,6 +56,63 @@ exports.generateLaporanBulanan = async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ message: 'Gagal membuat laporan', error: err.message });
+  }
+};
+
+// === FUNGSI BARU: Laporan Tahunan ===
+exports.generateLaporanTahunan = async (req, res) => {
+  try {
+    const { tahun } = req.query;
+
+    if (!tahun) {
+      return res.status(400).json({ message: 'Tahun wajib diisi' });
+    }
+
+    const startDate = new Date(tahun, 0, 1); // 1 Jan
+    const endDate = new Date(tahun, 11, 31, 23, 59, 59); // 31 Des
+
+    const tabunganData = await Tabungan.findAll({
+      where: {
+        created_at: {
+          [Op.between]: [startDate, endDate]
+        }
+      },
+      include: [{
+        model: Nasabah,
+        as: 'nasabah'
+      }]
+    });
+
+    // Group data per bulan
+    const laporanArray = tabunganData.map(item => ({
+      id_nasabah: item.id_nasabah,
+      nama_nasabah: item.nasabah?.nama || 'Tidak Diketahui',
+      jenis_sampah: item.jenis_sampah,
+      tanggal_menabung: item.created_at,
+      total_berat: parseFloat(item.berat),
+      total_nominal: parseFloat(item.total)
+    }));
+
+    const laporanExist = await Laporan.findOne({ where: { bulan: 0, tahun } });
+
+    if (laporanExist) {
+      await laporanExist.update({ data: laporanArray });
+    } else {
+      await Laporan.create({
+        bulan: 0, // penanda laporan tahunan
+        tahun,
+        data: laporanArray
+      });
+    }
+
+    res.json({
+      message: 'Laporan tahunan berhasil dibuat',
+      tahun: parseInt(tahun),
+      data: laporanArray
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal membuat laporan tahunan', error: err.message });
   }
 };
 

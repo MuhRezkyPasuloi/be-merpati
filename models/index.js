@@ -9,6 +9,7 @@ const Sampah = require('./sampah')(sequelize, DataTypes); // ✅ Tambahkan ini
 const Tabungan = require('./tabungan')(sequelize, DataTypes)
 const Penarikan = require('./penarikan')(sequelize, DataTypes);
 const Laporan = require('./laporan')(sequelize, DataTypes); // ✅ Tambahkan ini jika ada
+const Penjualan = require('./penjualan')(sequelize, DataTypes); // ✅ Tambahkan ini jika ada
 
 const db = {
   sequelize,
@@ -20,8 +21,8 @@ const db = {
   Sampah, // ✅ Tambahkan ini
   Tabungan,
   Penarikan,
-  Laporan
-  
+  Laporan,
+  Penjualan
 };
 
 Object.keys(db).forEach(modelName => {
@@ -29,5 +30,7 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
+
+
 
 module.exports = db;

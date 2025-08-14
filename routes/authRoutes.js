@@ -29,6 +29,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const rateLimit = require('express-rate-limit');
+const { authenticate } = require('../middleware/authMiddleware');
 
 // Maksimal 5 percobaan login per IP setiap 15 menit
 const loginLimiter = rateLimit({
@@ -40,5 +41,8 @@ const loginLimiter = rateLimit({
 });
 
 router.post('/login', loginLimiter, authController.login);
+router.put('/login/:id', authenticate, authController.updateLogin);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
 
 module.exports = router;

@@ -12,6 +12,14 @@ const Login = sequelize.define('Login', {
     allowNull: false,
     unique: true
   },
+  email: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true // validasi format email
+    }
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false

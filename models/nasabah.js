@@ -8,8 +8,14 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true,
     },
-    id_login: {type: DataTypes.INTEGER, allowNull: false}, // ⬅️ foreign key ke tabel login
-     // ⬅️ untuk display saja
+    id_login: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'login',
+      key: 'id'
+    }
+  },
     nama: DataTypes.STRING,
     no_hp: DataTypes.BIGINT,
     alamat: DataTypes.TEXT,
@@ -34,13 +40,14 @@ module.exports = (sequelize, DataTypes) => {
   Nasabah.associate = (models) => {
   Nasabah.hasMany(models.Tabungan, {
     foreignKey: 'id_nasabah',
-    as: 'Tabungans'
+    as: 'Tabungan'
   });
   Nasabah.belongsTo(models.Login, {
     foreignKey: 'id_login',
     as: 'login'
   });
 };
+
 
   return Nasabah;
 };
